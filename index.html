@@ -3,297 +3,1058 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>알바비 다이어리</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@3.4.15"></script>
-    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-</head>
-<body>
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-
-        function AlbaDiary() {
-            // LocalStorage 데이터 불러오기
-            const [records, setRecords] = useState(() => {
-                try {
-                    const saved = localStorage.getItem('alba_records');
-                    return saved ? JSON.parse(saved) : [];
-                } catch (e) {
-                    return [];
-                }
-            });
-            const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-            const [startTime, setStartTime] = useState('09:00');
-            const [endTime, setEndTime] = useState('18:00');
-            const [hourlyRate, setHourlyRate] = useState('10000');
-            const [workplaceIndex, setWorkplaceIndex] = useState('1');
-            const [workplaceName1, setWorkplaceName1] = useState('근무지1');
-            const [workplaceName2, setWorkplaceName2] = useState('근무지2');
-            const [workplaceName3, setWorkplaceName3] = useState('근무지3');
-            const [showSettings, setShowSettings] = useState(false);
-            const [currentDate, setCurrentDate] = useState(new Date());
-
-            // 데이터 변경 시 자동 저장
-            useEffect(() => {
-                localStorage.setItem('alba_records', JSON.stringify(records));
-            }, [records]);
-
-            const calculateHours = (start, end) => {
-                const [startH, startM] = start.split(':').map(Number);
-                const [endH, endM] = end.split(':').map(Number);
-                let startMinutes = startH * 60 + startM;
-                let endMinutes = endH * 60 + endM;
-                if (endMinutes < startMinutes) endMinutes += 24 * 60;
-                return (endMinutes - startMinutes) / 60;
-            };
-
-            const addRecord = () => {
-                if (!date || !startTime || !endTime || !hourlyRate) {
-                    alert('모든 항목을 입력해주세요');
-                    return;
-                }
-                const hours = calculateHours(startTime, endTime);
-                if (hours <= 0) {
-                    alert('종료 시간이 시작 시간보다 커야 합니다');
-                    return;
-                }
-                const dailyPay = hours * parseInt(hourlyRate);
-                let selectedWorkplaceName = workplaceName1;
-                if (workplaceIndex === '2') selectedWorkplaceName = workplaceName2;
-                if (workplaceIndex === '3') selectedWorkplaceName = workplaceName3;
-
-                const newRecord = {
-                    id: Date.now(),
-                    date,
-                    startTime,
-                    endTime,
-                    hours: hours.toFixed(2),
-                    hourlyRate: parseInt(hourlyRate),
-                    dailyPay: Math.round(dailyPay),
-                    workplaceIndex,
-                    workplaceName: selectedWorkplaceName,
-                };
-
-                setRecords([newRecord, ...records]);
-                setDate(new Date().toISOString().split('T')[0]);
-                setStartTime('09:00');
-                setEndTime('18:00');
-            };
-
-            const deleteRecord = (id) => {
-                setRecords(records.filter(r => r.id !== id));
-            };
-
-            const totalPay = records.reduce((sum, r) => sum + r.dailyPay, 0);
-            const totalHours = records.reduce((sum, r) => sum + parseFloat(r.hours), 0);
-
-            const getDaysInMonth = (date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-            const getFirstDayOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-            
-            const daysInMonth = getDaysInMonth(currentDate);
-            const firstDay = getFirstDayOfMonth(currentDate);
-            const days = [];
-            for (let i = 0; i < firstDay; i++) days.push(null);
-            for (let i = 1; i <= daysInMonth; i++) days.push(i);
-
-            const getPayByDate = (day) => {
-                const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                return records.filter(r => r.date === dateStr).reduce((sum, r) => sum + r.dailyPay, 0);
-            };
-
-            const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
-            const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
-
-            const sortedRecords = [...records].sort((a, b) => new Date(b.date) - new Date(a.date));
-            const monthStr = currentDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' });
-
-            const handleDateClick = (day) => {
-                if (day === null) return;
-                const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const dayRecord = records.find(r => r.date === dateStr);
-                if (dayRecord) {
-                    setDate(dayRecord.date);
-                    setStartTime(dayRecord.startTime);
-                    setEndTime(dayRecord.endTime);
-                    setHourlyRate(dayRecord.hourlyRate.toString());
-                    setWorkplaceIndex(dayRecord.workplaceIndex);
-                } else {
-                    setDate(dateStr);
-                }
-            };
-
-            return (
-                <div className="min-h-screen bg-blue-50 p-6">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
-                            <h1 className="text-3xl font-bold text-blue-600 mb-1">💼 알바비 다이어리</h1>
-                            <p className="text-xs text-gray-400 font-semibold">Made with ❤️ by ⓒ 다락글방</p>
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                            <div className="bg-white rounded-2xl shadow-md p-6">
-                                <h2 className="text-xl font-bold text-gray-800 mb-4">📝 근무 기록 추가</h2>
-                                <div className="space-y-4">
-                                    {showSettings && (
-                                        <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 mb-4">
-                                            <h3 className="text-sm font-bold text-gray-800 mb-3">근무지 이름 설정</h3>
-                                            <div className="space-y-3">
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-gray-700 mb-1">첫번째 근무지</label>
-                                                    <input type="text" value={workplaceName1} onChange={(e) => setWorkplaceName1(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-gray-700 mb-1">두번째 근무지</label>
-                                                    <input type="text" value={workplaceName2} onChange={(e) => setWorkplaceName2(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-gray-700 mb-1">세번째 근무지</label>
-                                                    <input type="text" value={workplaceName3} onChange={(e) => setWorkplaceName3(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
-                                                </div>
-                                                <button onClick={() => setShowSettings(false)} className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-2 rounded-lg">완료</button>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">📅 날짜</label>
-                                        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 border border-blue-200 rounded-lg" />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">🕐 시작시간</label>
-                                            <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="w-full px-4 py-3 border border-blue-200 rounded-lg" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">🕕 종료시간</label>
-                                            <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="w-full px-4 py-3 border border-blue-200 rounded-lg" />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">💰 시급 (원)</label>
-                                        <input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} className="w-full px-4 py-3 border border-blue-200 rounded-lg" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">🏢 근무지</label>
-                                        <select value={workplaceIndex} onChange={(e) => setWorkplaceIndex(e.target.value)} className="w-full px-4 py-3 border border-blue-200 rounded-lg">
-                                            <option value="1">{workplaceName1}</option>
-                                            <option value="2">{workplaceName2}</option>
-                                            <option value="3">{workplaceName3}</option>
-                                        </select>
-                                    </div>
-                                    <button onClick={() => setShowSettings(!showSettings)} className="w-full bg-gray-500 text-white font-bold py-2 rounded-lg">⚙️ 근무지 이름 설정</button>
-                                    <button onClick={addRecord} className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">기록 추가</button>
-                                </div>
-                            </div>
-
-                            <div className="bg-white rounded-2xl shadow-md p-6">
-                                <div className="flex justify-between items-center mb-4">
-                                    <button onClick={prevMonth} className="px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm">이전달</button>
-                                    <h3 className="text-lg font-bold text-gray-800">{monthStr}</h3>
-                                    <button onClick={nextMonth} className="px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm">다음달</button>
-                                </div>
-                                <div className="grid grid-cols-7 gap-1 mb-2">
-                                    {['일', '월', '화', '수', '목', '금', '토'].map(d => <div key={d} className="text-center font-bold text-gray-600 py-2 text-sm">{d}</div>)}
-                                </div>
-                                <div className="grid grid-cols-7 gap-1 mb-4">
-                                    {days.map((day, idx) => {
-                                        if (day === null) return <div key={idx} className="aspect-square bg-gray-50 rounded-lg"></div>;
-                                        const pay = getPayByDate(day);
-                                        const hasRecord = pay > 0;
-                                        
-                                        const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                                        const dayWorkplaces = records.filter(r => r.date === dateStr).map(r => r.workplaceIndex);
-                                        const uniqueWorkplaces = [...new Set(dayWorkplaces)];
-
-                                        let bgColor = 'bg-gray-100'; let textColor = 'text-gray-600'; let borderColor = '';
-                                        if (hasRecord) {
-                                            textColor = 'text-white';
-                                            if (uniqueWorkplaces.length === 1) {
-                                                if (uniqueWorkplaces[0] === '1') bgColor = 'bg-orange-500';
-                                                else if (uniqueWorkplaces[0] === '2') bgColor = 'bg-green-500';
-                                                else bgColor = 'bg-blue-500';
-                                            } else {
-                                                bgColor = 'bg-white'; textColor = 'text-gray-800'; borderColor = 'border-2 border-blue-500';
-                                            }
-                                        }
-
-                                        return (
-                                            <button key={idx} onClick={() => handleDateClick(day)} className={`aspect-square p-1 rounded-lg flex flex-col items-center justify-center ${bgColor} ${textColor} ${borderColor}`}>
-                                                <span className="text-xs font-bold">{day}</span>
-                                                {hasRecord && <span className="text-[10px] opacity-90">{(pay/1000).toFixed(0)}k</span>}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                                <div className="bg-blue-50 border border-blue-300 rounded-lg p-4 text-center">
-                                    <p className="text-sm font-semibold text-gray-700 mb-2">이달 급여 합계</p>
-                                    <p className="text-2xl font-bold text-blue-600">
-                                        {records.filter(r => {
-                                            const rd = new Date(r.date);
-                                            return rd.getFullYear() === currentDate.getFullYear() && rd.getMonth() === currentDate.getMonth();
-                                        }).reduce((sum, r) => sum + r.dailyPay, 0).toLocaleString()}원
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-3 mb-6 text-white text-center">
-                            <div className="bg-blue-500 rounded-xl p-3 shadow-sm">
-                                <p className="text-xs font-semibold opacity-90">총 근무시간</p>
-                                <p className="text-xl font-bold">{totalHours.toFixed(1)}h</p>
-                            </div>
-                            <div className="bg-green-500 rounded-xl p-3 shadow-sm">
-                                <p className="text-xs font-semibold opacity-90">총 급여</p>
-                                <p className="text-xl font-bold">{totalPay.toLocaleString()}원</p>
-                            </div>
-                            <div className="bg-purple-500 rounded-xl p-3 shadow-sm">
-                                <p className="text-xs font-semibold opacity-90">기록 개수</p>
-                                <p className="text-xl font-bold">{records.length}건</p>
-                            </div>
-                        </div>
-
-                        {records.length === 0 ? (
-                            <div className="bg-white rounded-2xl shadow-md p-8 text-center text-gray-500"><p>아직 기록이 없습니다</p></div>
-                        ) : (
-                            <div className="bg-white rounded-2xl shadow-md p-6 overflow-x-auto">
-                                <table className="w-full text-sm text-left">
-                                    <thead>
-                                        <tr className="border-b-2 border-blue-300 bg-blue-50 text-gray-700 font-bold">
-                                            <th className="p-2">날짜</th><th className="p-2">근무지</th><th className="p-2 text-center">시간</th><th className="p-2 text-right">일급</th><th className="p-2 text-center">삭제</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {sortedRecords.map(r => (
-                                            <tr key={r.id} className="border-b border-gray-200 hover:bg-blue-50">
-                                                <td className="p-2">{r.date.substring(5)}</td>
-                                                <td className="p-2"><span className="text-xs font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">{r.workplaceName}</span></td>
-                                                <td className="p-2 text-center">{parseFloat(r.hours).toFixed(1)}h</td>
-                                                <td className="p-2 text-right font-bold text-blue-600">{r.dailyPay.toLocaleString()}원</td>
-                                                <td className="p-2 text-center">
-                                                    <button onClick={() => deleteRecord(r.id)} className="bg-red-500 text-white px-2 py-0.5 rounded text-xs">삭제</button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-
-                        {records.length > 0 && (
-                            <div className="mt-6 flex justify-center">
-                                <button onClick={() => window.confirm('모든 기록을 삭제하시겠습니까?') && setRecords([])} className="bg-gray-500 text-white font-bold py-2 px-6 rounded-lg">
-                                    전체 초기화
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
+    <title>💼 알바비 다이어리</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        ReactDOM.render(<AlbaDiary />, document.getElementById('root'));
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            min-height: 100vh;
+            padding: 24px 16px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* 헤더 */
+        .header {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: #bbb;
+            font-weight: 600;
+        }
+
+        /* 메인 그리드 */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 카드 */
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 24px;
+        }
+
+        .card h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        /* 입력 폼 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #bbdefb;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .time-inputs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .time-inputs select:first-child {
+            flex: 1;
+        }
+
+        .time-inputs select:last-child {
+            width: 100px;
+        }
+
+        /* 버튼 */
+        button {
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #1976d2, #1565c0);
+            color: white;
+            padding: 12px;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 5px 15px rgba(25, 118, 210, 0.3);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            background: #757575;
+            color: white;
+            padding: 8px;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: #616161;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            background: #ef5350;
+            color: white;
+            font-size: 12px;
+        }
+
+        .btn-small:hover {
+            background: #e53935;
+        }
+
+        /* 설정 섹션 */
+        .settings-box {
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .settings-box h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        /* 달력 */
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .calendar-nav button {
+            padding: 8px;
+            background: transparent;
+            color: #1976d2;
+            font-size: 20px;
+        }
+
+        .calendar-nav button:hover {
+            background: #e3f2fd;
+        }
+
+        .calendar-nav h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: 700;
+            color: #666;
+            padding: 8px;
+            font-size: 12px;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            background: #f5f5f5;
+            color: #bbb;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-day:hover:not(:disabled) {
+            opacity: 0.8;
+        }
+
+        .calendar-day.empty {
+            cursor: default;
+            background: #fafafa;
+        }
+
+        .calendar-day.workplace1 {
+            background: linear-gradient(135deg, #ff9800, #fb8c00);
+            color: white;
+            font-weight: 700;
+        }
+
+        .calendar-day.workplace2 {
+            background: linear-gradient(135deg, #66bb6a, #43a047);
+            color: white;
+            font-weight: 700;
+        }
+
+        .calendar-day.workplace3 {
+            background: linear-gradient(135deg, #42a5f5, #1e88e5);
+            color: white;
+            font-weight: 700;
+        }
+
+        .calendar-day.multi {
+            background: white;
+            color: #333;
+            border: 2px solid #ff9800;
+            font-weight: 700;
+        }
+
+        .calendar-day span:last-child {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+
+        /* 달별 합계 */
+        .monthly-summary {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border: 2px solid #90caf9;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .monthly-summary p {
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .workplace-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid;
+        }
+
+        .workplace-summary.w1 {
+            border-left-color: #ff9800;
+        }
+
+        .workplace-summary.w2 {
+            border-left-color: #66bb6a;
+        }
+
+        .workplace-summary.w3 {
+            border-left-color: #42a5f5;
+        }
+
+        .workplace-summary span:first-child {
+            font-weight: 600;
+            color: #555;
+            font-size: 13px;
+        }
+
+        .workplace-summary span:last-child {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .workplace-summary.w1 span:last-child {
+            color: #ff9800;
+        }
+
+        .workplace-summary.w2 span:last-child {
+            color: #66bb6a;
+        }
+
+        .workplace-summary.w3 span:last-child {
+            color: #42a5f5;
+        }
+
+        .total-summary {
+            background: linear-gradient(135deg, #42a5f5, #1976d2);
+            color: white;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .total-summary p:first-child {
+            font-size: 11px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .total-summary p:last-child {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+        }
+
+        /* 요약 카드 */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .summary-cards {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+        }
+
+        .summary-card {
+            border-radius: 12px;
+            padding: 16px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .summary-card.blue {
+            background: linear-gradient(135deg, #42a5f5, #1e88e5);
+        }
+
+        .summary-card.green {
+            background: linear-gradient(135deg, #66bb6a, #43a047);
+        }
+
+        .summary-card.purple {
+            background: linear-gradient(135deg, #ab47bc, #8e24aa);
+        }
+
+        .summary-card p:first-child {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .summary-card p:nth-child(2) {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .summary-card p:last-child {
+            font-size: 11px;
+            opacity: 0.75;
+        }
+
+        /* 테이블 */
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .records-table thead {
+            background: #e3f2fd;
+            border-bottom: 2px solid #90caf9;
+        }
+
+        .records-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 700;
+            color: #555;
+        }
+
+        .records-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .records-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .workplace-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 11px;
+        }
+
+        .workplace-badge.w1 {
+            background: #ffe0b2;
+            color: #e65100;
+        }
+
+        .workplace-badge.w2 {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .workplace-badge.w3 {
+            background: #bbdefb;
+            color: #1565c0;
+        }
+
+        .pay-amount {
+            font-weight: 700;
+            color: #1976d2;
+        }
+
+        /* 빈 상태 */
+        .empty-state {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 64px 24px;
+            text-align: center;
+        }
+
+        .empty-state p {
+            color: #999;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p:last-child {
+            color: #bbb;
+            font-size: 14px;
+        }
+
+        /* 센터 버튼 */
+        .center-button {
+            display: flex;
+            justify-content: center;
+            margin-top: 24px;
+        }
+
+        .btn-reset {
+            background: #757575;
+            color: white;
+            padding: 10px 24px;
+            font-size: 14px;
+        }
+
+        .btn-reset:hover {
+            background: #616161;
+        }
+
+        /* 테이블 래퍼 */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .card h2 {
+                font-size: 16px;
+            }
+
+            .summary-card {
+                padding: 12px;
+            }
+
+            .summary-card p:nth-child(2) {
+                font-size: 20px;
+            }
+
+            .records-table {
+                font-size: 11px;
+            }
+
+            .records-table th,
+            .records-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1>💼 알바비 다이어리</h1>
+            <p>Made with ❤️ by ⓒ 다락글방</p>
+        </div>
+
+        <!-- 메인 그리드 -->
+        <div class="main-grid">
+            <!-- 좌측: 입력 폼 -->
+            <div class="card">
+                <h2>📝 근무 기록 추가</h2>
+                
+                <!-- 설정 섹션 -->
+                <div id="settingsBox" class="settings-box" style="display: none;">
+                    <h3>근무지 이름 설정</h3>
+                    <div class="form-group">
+                        <label>첫번째 근무지</label>
+                        <input type="text" id="workplaceName1" value="근무지1" placeholder="예: 카페">
+                    </div>
+                    <div class="form-group">
+                        <label>두번째 근무지</label>
+                        <input type="text" id="workplaceName2" value="근무지2" placeholder="예: 편의점">
+                    </div>
+                    <div class="form-group">
+                        <label>세번째 근무지</label>
+                        <input type="text" id="workplaceName3" value="근무지3" placeholder="예: 학원">
+                    </div>
+                    <button class="btn-secondary" onclick="toggleSettings()">완료</button>
+                </div>
+
+                <!-- 입력 필드 -->
+                <div class="form-group">
+                    <label>📅 날짜</label>
+                    <input type="date" id="inputDate">
+                </div>
+
+                <div class="form-group">
+                    <label>🕐 시작시간</label>
+                    <div class="time-inputs">
+                        <select id="startHour">
+                            <option>00</option>
+                            <option>01</option>
+                            <option>02</option>
+                            <option>03</option>
+                            <option>04</option>
+                            <option>05</option>
+                            <option>06</option>
+                            <option>07</option>
+                            <option>08</option>
+                            <option>09</option>
+                            <option selected>09</option>
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                            <option>13</option>
+                            <option>14</option>
+                            <option>15</option>
+                            <option>16</option>
+                            <option>17</option>
+                            <option>18</option>
+                            <option>19</option>
+                            <option>20</option>
+                            <option>21</option>
+                            <option>22</option>
+                            <option>23</option>
+                        </select>
+                        <select id="startMinute">
+                            <option selected>00</option>
+                            <option>15</option>
+                            <option>30</option>
+                            <option>45</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🕕 종료시간</label>
+                    <div class="time-inputs">
+                        <select id="endHour">
+                            <option>00</option>
+                            <option>01</option>
+                            <option>02</option>
+                            <option>03</option>
+                            <option>04</option>
+                            <option>05</option>
+                            <option>06</option>
+                            <option>07</option>
+                            <option>08</option>
+                            <option>09</option>
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                            <option>13</option>
+                            <option>14</option>
+                            <option>15</option>
+                            <option>16</option>
+                            <option>17</option>
+                            <option>18</option>
+                            <option selected>18</option>
+                            <option>19</option>
+                            <option>20</option>
+                            <option>21</option>
+                            <option>22</option>
+                            <option>23</option>
+                        </select>
+                        <select id="endMinute">
+                            <option selected>00</option>
+                            <option>15</option>
+                            <option>30</option>
+                            <option>45</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>💰 시급 (원)</label>
+                    <input type="number" id="hourlyRate" value="10000" placeholder="10000">
+                </div>
+
+                <div class="form-group">
+                    <label>🏢 근무지</label>
+                    <select id="workplaceIndex">
+                        <option value="1">근무지1</option>
+                        <option value="2">근무지2</option>
+                        <option value="3">근무지3</option>
+                    </select>
+                </div>
+
+                <button class="btn-secondary" onclick="toggleSettings()">⚙️ 근무지 이름 설정</button>
+                <button class="btn-primary" onclick="addRecord()">➕ 기록 추가</button>
+            </div>
+
+            <!-- 우측: 달력 -->
+            <div class="card">
+                <h2>📅 월별 달력</h2>
+                
+                <div class="calendar-nav">
+                    <button onclick="prevMonth()">◀</button>
+                    <h3 id="monthTitle"></h3>
+                    <button onclick="nextMonth()">▶</button>
+                </div>
+
+                <div class="weekdays">
+                    <div class="weekday">일</div>
+                    <div class="weekday">월</div>
+                    <div class="weekday">화</div>
+                    <div class="weekday">수</div>
+                    <div class="weekday">목</div>
+                    <div class="weekday">금</div>
+                    <div class="weekday">토</div>
+                </div>
+
+                <div class="calendar-days" id="calendarDays"></div>
+
+                <div class="monthly-summary">
+                    <p>이달 급여 합계</p>
+                    <div id="monthlySummaryContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 요약 카드 -->
+        <div class="summary-cards">
+            <div class="summary-card blue">
+                <p>총 근무시간</p>
+                <p id="totalHours">0</p>
+                <p>시간</p>
+            </div>
+            <div class="summary-card green">
+                <p>총 급여</p>
+                <p id="totalPay">0</p>
+                <p>원</p>
+            </div>
+            <div class="summary-card purple">
+                <p>기록 개수</p>
+                <p id="recordCount">0</p>
+                <p>건</p>
+            </div>
+        </div>
+
+        <!-- 기록 테이블 -->
+        <div id="recordsSection"></div>
+
+        <!-- 초기화 버튼 -->
+        <div id="resetButtonContainer"></div>
+    </div>
+
+    <script>
+        // 데이터 저장소
+        let records = JSON.parse(localStorage.getItem('albaRecords')) || [];
+        let currentDate = new Date();
+        let workplaceNames = JSON.parse(localStorage.getItem('workplaceNames')) || {
+            name1: '근무지1',
+            name2: '근무지2',
+            name3: '근무지3'
+        };
+
+        // 초기화
+        function init() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('inputDate').value = today;
+            updateWorkplaceSelects();
+            renderCalendar();
+            renderRecords();
+            updateSummary();
+        }
+
+        // 근무지 이름 업데이트
+        function updateWorkplaceSelects() {
+            document.getElementById('workplaceIndex').innerHTML = `
+                <option value="1">${workplaceNames.name1}</option>
+                <option value="2">${workplaceNames.name2}</option>
+                <option value="3">${workplaceNames.name3}</option>
+            `;
+        }
+
+        // 설정 토글
+        function toggleSettings() {
+            const settingsBox = document.getElementById('settingsBox');
+            settingsBox.style.display = settingsBox.style.display === 'none' ? 'block' : 'none';
+            
+            if (settingsBox.style.display === 'none') {
+                workplaceNames.name1 = document.getElementById('workplaceName1').value;
+                workplaceNames.name2 = document.getElementById('workplaceName2').value;
+                workplaceNames.name3 = document.getElementById('workplaceName3').value;
+                localStorage.setItem('workplaceNames', JSON.stringify(workplaceNames));
+                updateWorkplaceSelects();
+                renderCalendar();
+                renderRecords();
+            }
+        }
+
+        // 시간 계산
+        function calculateHours(startTime, endTime) {
+            const [startH, startM] = startTime.split(':').map(Number);
+            const [endH, endM] = endTime.split(':').map(Number);
+            let startMinutes = startH * 60 + startM;
+            let endMinutes = endH * 60 + endM;
+            
+            if (endMinutes < startMinutes) {
+                endMinutes += 24 * 60;
+            }
+            
+            return (endMinutes - startMinutes) / 60;
+        }
+
+        // 기록 추가
+        function addRecord() {
+            const date = document.getElementById('inputDate').value;
+            const startHour = document.getElementById('startHour').value;
+            const startMinute = document.getElementById('startMinute').value;
+            const endHour = document.getElementById('endHour').value;
+            const endMinute = document.getElementById('endMinute').value;
+            const hourlyRate = parseInt(document.getElementById('hourlyRate').value);
+            const workplaceIndex = document.getElementById('workplaceIndex').value;
+
+            if (!date || !hourlyRate) {
+                alert('모든 항목을 입력해주세요');
+                return;
+            }
+
+            const startTime = `${startHour}:${startMinute}`;
+            const endTime = `${endHour}:${endMinute}`;
+            const hours = calculateHours(startTime, endTime);
+
+            if (hours <= 0) {
+                alert('종료 시간이 시작 시간보다 커야 합니다');
+                return;
+            }
+
+            const dailyPay = hours * hourlyRate;
+            const workplaceName = 
+                workplaceIndex === '1' ? workplaceNames.name1 :
+                workplaceIndex === '2' ? workplaceNames.name2 :
+                workplaceNames.name3;
+
+            const newRecord = {
+                id: Date.now(),
+                date,
+                startTime,
+                endTime,
+                hours: hours.toFixed(2),
+                hourlyRate,
+                dailyPay: Math.round(dailyPay),
+                workplaceIndex,
+                workplaceName
+            };
+
+            records.unshift(newRecord);
+            localStorage.setItem('albaRecords', JSON.stringify(records));
+
+            // 입력값 초기화
+            document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('startHour').value = '09';
+            document.getElementById('endHour').value = '18';
+
+            renderCalendar();
+            renderRecords();
+            updateSummary();
+        }
+
+        // 기록 삭제
+        function deleteRecord(id) {
+            records = records.filter(r => r.id !== id);
+            localStorage.setItem('albaRecords', JSON.stringify(records));
+            renderCalendar();
+            renderRecords();
+            updateSummary();
+        }
+
+        // 달력 렌더링
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('monthTitle').textContent = 
+                new Date(year, month).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            const calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+
+            // 빈 칸
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'calendar-day empty';
+            }
+
+            // 날짜들
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayRecords = records.filter(r => r.date === dateStr);
+                const pay = dayRecords.reduce((sum, r) => sum + r.dailyPay, 0);
+                
+                const button = document.createElement('button');
+                button.className = 'calendar-day';
+                button.type = 'button';
+
+                if (dayRecords.length === 0) {
+                    button.classList.add('empty');
+                } else {
+                    const workplaces = [...new Set(dayRecords.map(r => r.workplaceIndex))];
+                    if (workplaces.length === 1) {
+                        button.classList.add(`workplace${workplaces[0]}`);
+                    } else {
+                        button.classList.add('multi');
+                    }
+                }
+
+                button.innerHTML = `<span>${day}</span>`;
+                if (pay > 0) {
+                    button.innerHTML += `<span>${(pay/1000).toFixed(0)}k</span>`;
+                }
+
+                button.onclick = () => handleDateClick(dateStr);
+                calendarDays.appendChild(button);
+            }
+
+            renderMonthlySummary();
+        }
+
+        // 달별 요약 렌더링
+        function renderMonthlySummary() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            const monthRecords = records.filter(r => {
+                const rDate = new Date(r.date);
+                return rDate.getFullYear() === year && rDate.getMonth() === month;
+            });
+
+            const w1 = monthRecords.filter(r => r.workplaceIndex === '1').reduce((sum, r) => sum + r.dailyPay, 0);
+            const w2 = monthRecords.filter(r => r.workplaceIndex === '2').reduce((sum, r) => sum + r.dailyPay, 0);
+            const w3 = monthRecords.filter(r => r.workplaceIndex === '3').reduce((sum, r) => sum + r.dailyPay, 0);
+            const total = w1 + w2 + w3;
+
+            let html = '';
+            if (w1 > 0) html += `<div class="workplace-summary w1"><span>${workplaceNames.name1}</span><span>${w1.toLocaleString()}원</span></div>`;
+            if (w2 > 0) html += `<div class="workplace-summary w2"><span>${workplaceNames.name2}</span><span>${w2.toLocaleString()}원</span></div>`;
+            if (w3 > 0) html += `<div class="workplace-summary w3"><span>${workplaceNames.name3}</span><span>${w3.toLocaleString()}원</span></div>`;
+            
+            html += `<div class="total-summary"><p>전체 합계</p><p>${total.toLocaleString()}원</p></div>`;
+
+            document.getElementById('monthlySummaryContent').innerHTML = html;
+        }
+
+        // 날짜 클릭
+        function handleDateClick(dateStr) {
+            const dayRecord = records.find(r => r.date === dateStr);
+            document.getElementById('inputDate').value = dateStr;
+            
+            if (dayRecord) {
+                const [sh, sm] = dayRecord.startTime.split(':');
+                const [eh, em] = dayRecord.endTime.split(':');
+                document.getElementById('startHour').value = sh;
+                document.getElementById('startMinute').value = sm;
+                document.getElementById('endHour').value = eh;
+                document.getElementById('endMinute').value = em;
+                document.getElementById('hourlyRate').value = dayRecord.hourlyRate;
+                document.getElementById('workplaceIndex').value = dayRecord.workplaceIndex;
+            }
+        }
+
+        // 기록 렌더링
+        function renderRecords() {
+            const sorted = [...records].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (sorted.length === 0) {
+                document.getElementById('recordsSection').innerHTML = `
+                    <div class="empty-state">
+                        <p>아직 기록이 없습니다</p>
+                        <p>위에서 근무 기록을 추가해주세요</p>
+                    </div>
+                `;
+                document.getElementById('resetButtonContainer').innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <div class="card">
+                    <h2>📊 근무 기록</h2>
+                    <div class="table-wrapper">
+                        <table class="records-table">
+                            <thead>
+                                <tr>
+                                    <th>날짜</th>
+                                    <th>근무지</th>
+                                    <th>시간</th>
+                                    <th>시급</th>
+                                    <th>일급</th>
+                                    <th>삭제</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+
+            sorted.forEach(record => {
+                const date = new Date(record.date + 'T00:00:00');
+                const dateStr = date.toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' });
+                const workplaceClass = `w${record.workplaceIndex}`;
+                const shortName = record.workplaceName.charAt(0);
+
+                html += `
+                    <tr>
+                        <td>${dateStr}</td>
+                        <td><span class="workplace-badge ${workplaceClass}">${shortName}</span></td>
+                        <td>${parseFloat(record.hours).toFixed(1)}h</td>
+                        <td>${record.hourlyRate.toLocaleString()}</td>
+                        <td class="pay-amount">${record.dailyPay.toLocaleString()}</td>
+                        <td><button class="btn-small" onclick="deleteRecord(${record.id})">삭제</button></td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('recordsSection').innerHTML = html;
+
+            // 초기화 버튼
+            document.getElementById('resetButtonContainer').innerHTML = `
+                <div class="center-button">
+                    <button class="btn-reset" onclick="resetAll()">🔄 초기화</button>
+                </div>
+            `;
+        }
+
+        // 요약 업데이트
+        function updateSummary() {
+            const totalHours = records.reduce((sum, r) => sum + parseFloat(r.hours), 0);
+            const totalPay = records.reduce((sum, r) => sum + r.dailyPay, 0);
+
+            document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+            document.getElementById('totalPay').textContent = totalPay.toLocaleString();
+            document.getElementById('recordCount').textContent = records.length;
+        }
+
+        // 달 변경
+        function prevMonth() {
+            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        // 모두 초기화
+        function resetAll() {
+            if (confirm('모든 기록을 삭제하시겠습니까?')) {
+                records = [];
+                localStorage.setItem('albaRecords', JSON.stringify(records));
+                renderCalendar();
+                renderRecords();
+                updateSummary();
+            }
+        }
+
+        // 시작
+        init();
     </script>
 </body>
 </html>
