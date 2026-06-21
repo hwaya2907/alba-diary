@@ -132,6 +132,9 @@
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
+        .form-row.date-hourly .form-group:first-child input {
+    width: fit-content;
+}
 
         button {
             border: none;
@@ -659,7 +662,7 @@
                 </div>
 
                 <!-- 날짜 + 시급 한 줄 -->
-                <div class="form-row">
+                <div class="form-row date-hourly">
                     <div class="form-group">
                         <label>📅 날짜</label>
                         <input type="date" id="inputDate">
