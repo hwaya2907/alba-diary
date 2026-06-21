@@ -19,7 +19,6 @@
             overflow-x: hidden;
         }
 
-        /* 숫자 입력 필드 스핀 버튼 제거 */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -35,7 +34,6 @@
             margin: 0 auto;
         }
 
-        /* 헤더 */
         .header {
             background: white;
             border-radius: 16px;
@@ -59,7 +57,6 @@
             font-weight: 600;
         }
 
-        /* 메인 그리드 */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -73,7 +70,6 @@
             }
         }
 
-        /* 카드 */
         .card {
             background: white;
             border-radius: 16px;
@@ -88,7 +84,6 @@
             font-weight: 700;
         }
 
-        /* 입력 폼 */
         .form-group {
             margin-bottom: 16px;
         }
@@ -131,7 +126,13 @@
             width: 100px;
         }
 
-        /* 버튼 */
+        /* 모바일용 2열 레이아웃 */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
         button {
             border: none;
             border-radius: 8px;
@@ -178,7 +179,6 @@
             background: #e53935;
         }
 
-        /* 설정 섹션 */
         .settings-box {
             background: #f5f5f5;
             border: 2px solid #ddd;
@@ -194,7 +194,6 @@
             margin-bottom: 12px;
         }
 
-        /* 달력 */
         .calendar-nav {
             display: flex;
             justify-content: space-between;
@@ -219,7 +218,6 @@
             color: #333;
         }
 
-        /* 요일 */
         .weekdays {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -240,7 +238,6 @@
             line-height: 1.2;
         }
 
-        /* 날짜 */
         .calendar-days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -318,7 +315,6 @@
             margin-top: 1px;
         }
 
-        /* 달별 합계 */
         .monthly-summary {
             background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
             border: 2px solid #90caf9;
@@ -401,19 +397,11 @@
             color: white;
         }
 
-        /* 요약 카드 */
         .summary-cards {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             margin-bottom: 24px;
-        }
-
-        @media (max-width: 768px) {
-            .summary-cards {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
-            }
         }
 
         .summary-card {
@@ -452,7 +440,6 @@
             opacity: 0.75;
         }
 
-        /* 테이블 */
         .records-table {
             width: 100%;
             border-collapse: collapse;
@@ -508,7 +495,6 @@
             color: #1976d2;
         }
 
-        /* 빈 상태 */
         .empty-state {
             background: white;
             border-radius: 16px;
@@ -528,7 +514,6 @@
             font-size: 14px;
         }
 
-        /* 센터 버튼 */
         .center-button {
             display: flex;
             justify-content: center;
@@ -546,11 +531,11 @@
             background: #616161;
         }
 
-        /* 테이블 래퍼 */
         .table-wrapper {
             overflow-x: auto;
         }
 
+        /* 모바일 최적화 */
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 20px;
@@ -558,6 +543,72 @@
 
             .card h2 {
                 font-size: 16px;
+            }
+
+            .form-group input,
+            .form-group select {
+                padding: 10px;
+                font-size: 16px;
+            }
+
+            .time-inputs {
+                gap: 6px;
+            }
+
+            .time-inputs select:last-child {
+                width: 70px;
+            }
+
+            /* 버튼 한 줄 */
+            .btn-secondary {
+                width: 48%;
+                display: inline-block;
+                margin-right: 2%;
+                margin-top: 8px;
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .btn-primary {
+                width: 48%;
+                display: inline-block;
+                margin-right: 0;
+                margin-top: 8px;
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .weekdays {
+                gap: 4px;
+            }
+
+            .calendar-days {
+                gap: 4px;
+            }
+
+            .calendar-day {
+                font-size: 8px;
+                padding: 2px;
+                min-height: 40px;
+            }
+
+            .calendar-day span:first-child {
+                font-size: 9px;
+            }
+
+            .calendar-day span:last-child {
+                font-size: 6px;
+            }
+
+            .weekday {
+                font-size: 10px;
+                padding: 4px;
+                height: 28px;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
             }
 
             .summary-card {
@@ -581,19 +632,15 @@
 </head>
 <body>
     <div class="container">
-        <!-- 헤더 -->
         <div class="header">
             <h1>💼 알바비 다이어리</h1>
             <p>Made with ❤️ by ⓒ 다락글방</p>
         </div>
 
-        <!-- 메인 그리드 -->
         <div class="main-grid">
-            <!-- 좌측: 입력 폼 -->
             <div class="card">
                 <h2>📝 근무 기록 추가</h2>
                 
-                <!-- 설정 섹션 -->
                 <div id="settingsBox" class="settings-box" style="display: none;">
                     <h3>근무지 이름 설정</h3>
                     <div class="form-group">
@@ -611,93 +658,45 @@
                     <button class="btn-secondary" onclick="toggleSettings()">완료</button>
                 </div>
 
-                <!-- 입력 필드 -->
-                <div class="form-group">
-                    <label>📅 날짜</label>
-                    <input type="date" id="inputDate">
-                </div>
-
-                <div class="form-group">
-                    <label>🕐 시작시간</label>
-                    <div class="time-inputs">
-                        <select id="startHour">
-                            <option>00</option>
-                            <option>01</option>
-                            <option>02</option>
-                            <option>03</option>
-                            <option>04</option>
-                            <option>05</option>
-                            <option>06</option>
-                            <option>07</option>
-                            <option>08</option>
-                            <option selected>09</option>
-                            <option>10</option>
-                            <option>11</option>
-                            <option>12</option>
-                            <option>13</option>
-                            <option>14</option>
-                            <option>15</option>
-                            <option>16</option>
-                            <option>17</option>
-                            <option>18</option>
-                            <option>19</option>
-                            <option>20</option>
-                            <option>21</option>
-                            <option>22</option>
-                            <option>23</option>
-                        </select>
-                        <select id="startMinute">
-                            <option selected>00</option>
-                            <option>15</option>
-                            <option>30</option>
-                            <option>45</option>
-                        </select>
+                <!-- 날짜 + 시급 한 줄 -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>📅 날짜</label>
+                        <input type="date" id="inputDate">
+                    </div>
+                    <div class="form-group">
+                        <label>💰 시급 (원)</label>
+                        <input type="number" id="hourlyRate" value="10000" placeholder="10000">
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>🕕 종료시간</label>
-                    <div class="time-inputs">
-                        <select id="endHour">
-                            <option>00</option>
-                            <option>01</option>
-                            <option>02</option>
-                            <option>03</option>
-                            <option>04</option>
-                            <option>05</option>
-                            <option>06</option>
-                            <option>07</option>
-                            <option>08</option>
-                            <option>09</option>
-                            <option>10</option>
-                            <option>11</option>
-                            <option>12</option>
-                            <option>13</option>
-                            <option>14</option>
-                            <option>15</option>
-                            <option>16</option>
-                            <option>17</option>
-                            <option selected>18</option>
-                            <option>19</option>
-                            <option>20</option>
-                            <option>21</option>
-                            <option>22</option>
-                            <option>23</option>
-                        </select>
-                        <select id="endMinute">
-                            <option selected>00</option>
-                            <option>15</option>
-                            <option>30</option>
-                            <option>45</option>
-                        </select>
+                <!-- 시작시간 + 종료시간 한 줄 -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>🕐 시작시간</label>
+                        <div class="time-inputs">
+                            <select id="startHour">
+                                <option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option selected>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option>
+                            </select>
+                            <select id="startMinute">
+                                <option selected>00</option><option>15</option><option>30</option><option>45</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>🕕 종료시간</label>
+                        <div class="time-inputs">
+                            <select id="endHour">
+                                <option>00</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option><option>08</option><option>09</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option selected>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option>
+                            </select>
+                            <select id="endMinute">
+                                <option selected>00</option><option>15</option><option>30</option><option>45</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>💰 시급 (원)</label>
-                    <input type="number" id="hourlyRate" value="10000" placeholder="10000">
-                </div>
-
+                <!-- 근무지 (전체) -->
                 <div class="form-group">
                     <label>🏢 근무지</label>
                     <select id="workplaceIndex">
@@ -707,11 +706,11 @@
                     </select>
                 </div>
 
+                <!-- 버튼 한 줄 -->
                 <button class="btn-secondary" onclick="toggleSettings()">⚙️ 근무지 이름 설정</button>
                 <button class="btn-primary" onclick="addRecord()">➕ 기록 추가</button>
             </div>
 
-            <!-- 우측: 달력 -->
             <div class="card">
                 <h2>📅 월별 달력</h2>
                 
@@ -740,7 +739,6 @@
             </div>
         </div>
 
-        <!-- 요약 카드 -->
         <div class="summary-cards">
             <div class="summary-card blue">
                 <p>총 근무시간</p>
@@ -759,15 +757,11 @@
             </div>
         </div>
 
-        <!-- 기록 테이블 -->
         <div id="recordsSection"></div>
-
-        <!-- 초기화 버튼 -->
         <div id="resetButtonContainer"></div>
     </div>
 
     <script>
-        // 데이터 저장소
         let records = JSON.parse(localStorage.getItem('albaRecords')) || [];
         let currentDate = new Date();
         let workplaceNames = JSON.parse(localStorage.getItem('workplaceNames')) || {
@@ -776,7 +770,6 @@
             name3: '근무지3'
         };
 
-        // 초기화
         function init() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('inputDate').value = today;
@@ -786,7 +779,6 @@
             updateSummary();
         }
 
-        // 근무지 이름 업데이트
         function updateWorkplaceSelects() {
             document.getElementById('workplaceIndex').innerHTML = `
                 <option value="1">${workplaceNames.name1}</option>
@@ -795,7 +787,6 @@
             `;
         }
 
-        // 설정 토글
         function toggleSettings() {
             const settingsBox = document.getElementById('settingsBox');
             settingsBox.style.display = settingsBox.style.display === 'none' ? 'block' : 'none';
@@ -811,7 +802,6 @@
             }
         }
 
-        // 시간 계산
         function calculateHours(startTime, endTime) {
             const [startH, startM] = startTime.split(':').map(Number);
             const [endH, endM] = endTime.split(':').map(Number);
@@ -825,7 +815,6 @@
             return (endMinutes - startMinutes) / 60;
         }
 
-        // 기록 추가
         function addRecord() {
             const date = document.getElementById('inputDate').value;
             const startHour = document.getElementById('startHour').value;
@@ -870,7 +859,6 @@
             records.unshift(newRecord);
             localStorage.setItem('albaRecords', JSON.stringify(records));
 
-            // 입력값 초기화
             document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('startHour').value = '09';
             document.getElementById('endHour').value = '18';
@@ -880,7 +868,6 @@
             updateSummary();
         }
 
-        // 기록 삭제
         function deleteRecord(id) {
             records = records.filter(r => r.id !== id);
             localStorage.setItem('albaRecords', JSON.stringify(records));
@@ -889,7 +876,6 @@
             updateSummary();
         }
 
-        // 달력 렌더링
         function renderCalendar() {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
@@ -903,14 +889,12 @@
             const calendarDays = document.getElementById('calendarDays');
             calendarDays.innerHTML = '';
 
-            // 빈 칸 추가
             for (let i = 0; i < firstDay; i++) {
                 const emptyDiv = document.createElement('div');
                 emptyDiv.className = 'calendar-day empty';
                 calendarDays.appendChild(emptyDiv);
             }
 
-            // 날짜들 추가
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const dayRecords = records.filter(r => r.date === dateStr);
@@ -943,7 +927,6 @@
             renderMonthlySummary();
         }
 
-        // 달별 요약 렌더링
         function renderMonthlySummary() {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
@@ -968,7 +951,6 @@
             document.getElementById('monthlySummaryContent').innerHTML = html;
         }
 
-        // 날짜 클릭
         function handleDateClick(dateStr) {
             const dayRecord = records.find(r => r.date === dateStr);
             document.getElementById('inputDate').value = dateStr;
@@ -985,7 +967,6 @@
             }
         }
 
-        // 기록 렌더링
         function renderRecords() {
             const sorted = [...records].sort((a, b) => new Date(b.date) - new Date(a.date));
             
@@ -1045,7 +1026,6 @@
 
             document.getElementById('recordsSection').innerHTML = html;
 
-            // 초기화 버튼
             document.getElementById('resetButtonContainer').innerHTML = `
                 <div class="center-button">
                     <button class="btn-reset" onclick="resetAll()">🔄 초기화</button>
@@ -1053,7 +1033,6 @@
             `;
         }
 
-        // 요약 업데이트
         function updateSummary() {
             const totalHours = records.reduce((sum, r) => sum + parseFloat(r.hours), 0);
             const totalPay = records.reduce((sum, r) => sum + r.dailyPay, 0);
@@ -1063,7 +1042,6 @@
             document.getElementById('recordCount').textContent = records.length;
         }
 
-        // 달 변경
         function prevMonth() {
             currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1);
             renderCalendar();
@@ -1074,7 +1052,6 @@
             renderCalendar();
         }
 
-        // 모두 초기화
         function resetAll() {
             if (confirm('모든 기록을 삭제하시겠습니까?')) {
                 records = [];
@@ -1085,7 +1062,6 @@
             }
         }
 
-        // 시작
         init();
     </script>
 </body>
