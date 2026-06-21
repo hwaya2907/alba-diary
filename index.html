@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>알바비 다이어리</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@3.4.15"></script>
     <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -16,7 +16,7 @@
         const { useState, useEffect } = React;
 
         function AlbaDiary() {
-            // LocalStorage에서 데이터 가져오기
+            // LocalStorage 데이터 불러오기
             const [records, setRecords] = useState(() => {
                 try {
                     const saved = localStorage.getItem('alba_records');
@@ -36,7 +36,7 @@
             const [showSettings, setShowSettings] = useState(false);
             const [currentDate, setCurrentDate] = useState(new Date());
 
-            // 데이터 바뀔 때마다 자동 저장
+            // 데이터 변경 시 자동 저장
             useEffect(() => {
                 localStorage.setItem('alba_records', JSON.stringify(records));
             }, [records]);
@@ -126,32 +126,32 @@
             };
 
             return (
-                <div className="min-h-screen bg-gradient-to-br from-blue-100 to-blue-50 p-6">
+                <div className="min-h-screen bg-blue-50 p-6">
                     <div className="max-w-7xl mx-auto">
-                        <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6 mb-4 lg:mb-6">
-                            <h1 className="text-xl lg:text-4xl font-bold text-blue-600 mb-1">💼 알바비 다이어리</h1>
+                        <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
+                            <h1 className="text-3xl font-bold text-blue-600 mb-1">💼 알바비 다이어리</h1>
                             <p className="text-xs text-gray-400 font-semibold">Made with ❤️ by ⓒ 다락글방</p>
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                            <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6">
-                                <h2 className="text-lg lg:text-xl font-bold text-gray-800 mb-3 lg:mb-4">📝 근무 기록 추가</h2>
+                            <div className="bg-white rounded-2xl shadow-md p-6">
+                                <h2 className="text-xl font-bold text-gray-800 mb-4">📝 근무 기록 추가</h2>
                                 <div className="space-y-4">
                                     {showSettings && (
-                                        <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 mb-4">
+                                        <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 mb-4">
                                             <h3 className="text-sm font-bold text-gray-800 mb-3">근무지 이름 설정</h3>
                                             <div className="space-y-3">
                                                 <div>
                                                     <label className="block text-xs font-semibold text-gray-700 mb-1">첫번째 근무지</label>
-                                                    <input type="text" value={workplaceName1} onChange={(e) => setWorkplaceName1(e.target.value)} className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm" />
+                                                    <input type="text" value={workplaceName1} onChange={(e) => setWorkplaceName1(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs font-semibold text-gray-700 mb-1">두번째 근무지</label>
-                                                    <input type="text" value={workplaceName2} onChange={(e) => setWorkplaceName2(e.target.value)} className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm" />
+                                                    <input type="text" value={workplaceName2} onChange={(e) => setWorkplaceName2(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs font-semibold text-gray-700 mb-1">세번째 근무지</label>
-                                                    <input type="text" value={workplaceName3} onChange={(e) => setWorkplaceName3(e.target.value)} className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm" />
+                                                    <input type="text" value={workplaceName3} onChange={(e) => setWorkplaceName3(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
                                                 </div>
                                                 <button onClick={() => setShowSettings(false)} className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-2 rounded-lg">완료</button>
                                             </div>
@@ -159,25 +159,25 @@
                                     )}
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-2">📅 날짜</label>
-                                        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg" />
+                                        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 border border-blue-200 rounded-lg" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
                                             <label className="block text-sm font-semibold text-gray-700 mb-2">🕐 시작시간</label>
-                                            <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg" />
+                                            <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="w-full px-4 py-3 border border-blue-200 rounded-lg" />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-semibold text-gray-700 mb-2">🕕 종료시간</label>
-                                            <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg" />
+                                            <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="w-full px-4 py-3 border border-blue-200 rounded-lg" />
                                         </div>
                                     </div>
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-2">💰 시급 (원)</label>
-                                        <input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg" />
+                                        <input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} className="w-full px-4 py-3 border border-blue-200 rounded-lg" />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-2">🏢 근무지</label>
-                                        <select value={workplaceIndex} onChange={(e) => setWorkplaceIndex(e.target.value)} className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg">
+                                        <select value={workplaceIndex} onChange={(e) => setWorkplaceIndex(e.target.value)} className="w-full px-4 py-3 border border-blue-200 rounded-lg">
                                             <option value="1">{workplaceName1}</option>
                                             <option value="2">{workplaceName2}</option>
                                             <option value="3">{workplaceName3}</option>
@@ -188,11 +188,11 @@
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6">
+                            <div className="bg-white rounded-2xl shadow-md p-6">
                                 <div className="flex justify-between items-center mb-4">
-                                    <button onClick={prevMonth} className="p-2 bg-blue-50 rounded-lg">이전달</button>
+                                    <button onClick={prevMonth} className="px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm">이전달</button>
                                     <h3 className="text-lg font-bold text-gray-800">{monthStr}</h3>
-                                    <button onClick={nextMonth} className="p-2 bg-blue-50 rounded-lg">다음달</button>
+                                    <button onClick={nextMonth} className="px-3 py-1 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm">다음달</button>
                                 </div>
                                 <div className="grid grid-cols-7 gap-1 mb-2">
                                     {['일', '월', '화', '수', '목', '금', '토'].map(d => <div key={d} className="text-center font-bold text-gray-600 py-2 text-sm">{d}</div>)}
@@ -227,7 +227,7 @@
                                         );
                                     })}
                                 </div>
-                                <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 text-center">
+                                <div className="bg-blue-50 border border-blue-300 rounded-lg p-4 text-center">
                                     <p className="text-sm font-semibold text-gray-700 mb-2">이달 급여 합계</p>
                                     <p className="text-2xl font-bold text-blue-600">
                                         {records.filter(r => {
@@ -240,24 +240,24 @@
                         </div>
 
                         <div className="grid grid-cols-3 gap-3 mb-6 text-white text-center">
-                            <div className="bg-blue-500 rounded-xl p-3 shadow-lg">
+                            <div className="bg-blue-500 rounded-xl p-3 shadow-sm">
                                 <p className="text-xs font-semibold opacity-90">총 근무시간</p>
                                 <p className="text-xl font-bold">{totalHours.toFixed(1)}h</p>
                             </div>
-                            <div className="bg-green-500 rounded-xl p-3 shadow-lg">
+                            <div className="bg-green-500 rounded-xl p-3 shadow-sm">
                                 <p className="text-xs font-semibold opacity-90">총 급여</p>
                                 <p className="text-xl font-bold">{totalPay.toLocaleString()}원</p>
                             </div>
-                            <div className="bg-purple-500 rounded-xl p-3 shadow-lg">
+                            <div className="bg-purple-500 rounded-xl p-3 shadow-sm">
                                 <p className="text-xs font-semibold opacity-90">기록 개수</p>
                                 <p className="text-xl font-bold">{records.length}건</p>
                             </div>
                         </div>
 
                         {records.length === 0 ? (
-                            <div className="bg-white rounded-2xl shadow-lg p-8 text-center text-gray-500"><p>아직 기록이 없습니다</p></div>
+                            <div className="bg-white rounded-2xl shadow-md p-8 text-center text-gray-500"><p>아직 기록이 없습니다</p></div>
                         ) : (
-                            <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto">
+                            <div className="bg-white rounded-2xl shadow-md p-6 overflow-x-auto">
                                 <table className="w-full text-sm text-left">
                                     <thead>
                                         <tr className="border-b-2 border-blue-300 bg-blue-50 text-gray-700 font-bold">
