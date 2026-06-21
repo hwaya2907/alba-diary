@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>알바비 다이어리</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -17,10 +17,14 @@
         const { useState, useEffect } = React;
 
         function AlbaDiary() {
-            // 💡 [LocalStorage 추가] 앱을 켤 때 저장된 데이터가 있으면 불러옵니다.
+            // LocalStorage에서 데이터 가져오기
             const [records, setRecords] = useState(() => {
-                const saved = localStorage.getItem('alba_records');
-                return saved ? JSON.parse(saved) : [];
+                try {
+                    const saved = localStorage.getItem('alba_records');
+                    return saved ? JSON.parse(saved) : [];
+                } catch (e) {
+                    return [];
+                }
             });
             const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
             const [startTime, setStartTime] = useState('09:00');
@@ -33,12 +37,11 @@
             const [showSettings, setShowSettings] = useState(false);
             const [currentDate, setCurrentDate] = useState(new Date());
 
-            // 💡 [LocalStorage 추가] 기록이 바뀔 때마다 컴퓨터나 스마트폰에 자동으로 저장합니다.
+            // 데이터 바뀔 때마다 자동 저장
             useEffect(() => {
                 localStorage.setItem('alba_records', JSON.stringify(records));
             }, [records]);
 
-            // 시간 계산
             const calculateHours = (start, end) => {
                 const [startH, startM] = start.split(':').map(Number);
                 const [endH, endM] = end.split(':').map(Number);
@@ -48,7 +51,6 @@
                 return (endMinutes - startMinutes) / 60;
             };
 
-            // 기록 추가
             const addRecord = () => {
                 if (!date || !startTime || !endTime || !hourlyRate) {
                     alert('모든 항목을 입력해주세요');
@@ -82,7 +84,6 @@
                 setEndTime('18:00');
             };
 
-            // 기록 삭제
             const deleteRecord = (id) => {
                 setRecords(records.filter(r => r.id !== id));
             };
@@ -90,7 +91,6 @@
             const totalPay = records.reduce((sum, r) => sum + r.dailyPay, 0);
             const totalHours = records.reduce((sum, r) => sum + parseFloat(r.hours), 0);
 
-            // 달력 계산
             const getDaysInMonth = (date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
             const getFirstDayOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
             
@@ -129,17 +129,12 @@
             return (
                 <div className="min-h-screen bg-gradient-to-br from-blue-100 to-blue-50 p-6">
                     <div className="max-w-7xl mx-auto">
-                        {/* 헤더 */}
                         <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6 mb-4 lg:mb-6">
-                            <h1 className="text-xl lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400 mb-1">
-                                💼 알바비 다이어리
-                            </h1>
+                            <h1 className="text-xl lg:text-4xl font-bold text-blue-600 mb-1">💼 알바비 다이어리</h1>
                             <p className="text-xs text-gray-400 font-semibold">Made with ❤️ by ⓒ 다락글방</p>
                         </div>
 
-                        {/* 메인 콘텐츠 */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                            {/* 왼쪽: 입력 폼 */}
                             <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6">
                                 <h2 className="text-lg lg:text-xl font-bold text-gray-800 mb-3 lg:mb-4">📝 근무 기록 추가</h2>
                                 <div className="space-y-4">
@@ -147,12 +142,18 @@
                                         <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 mb-4">
                                             <h3 className="text-sm font-bold text-gray-800 mb-3">근무지 이름 설정</h3>
                                             <div className="space-y-3">
-                                                {[[workplaceName1, setWorkplaceName1, "첫번째 근무지"], [workplaceName2, setWorkplaceName2, "두번째 근무지"], [workplaceName3, setWorkplaceName3, "세번째 근무지"]].map(([val, setVal, label]) => (
-                                                    <div key={label}>
-                                                        <label className="block text-xs font-semibold text-gray-700 mb-1">{label}</label>
-                                                        <input type="text" value={val} onChange={(e) => setVal(e.target.value)} className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm" />
-                                                    </div>
-                                                ))}
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-gray-700 mb-1">첫번째 근무지</label>
+                                                    <input type="text" value={workplaceName1} onChange={(e) => setWorkplaceName1(e.target.value)} className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-gray-700 mb-1">두번째 근무지</label>
+                                                    <input type="text" value={workplaceName2} onChange={(e) => setWorkplaceName2(e.target.value)} className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-gray-700 mb-1">세번째 근무지</label>
+                                                    <input type="text" value={workplaceName3} onChange={(e) => setWorkplaceName3(e.target.value)} className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm" />
+                                                </div>
                                                 <button onClick={() => setShowSettings(false)} className="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-2 rounded-lg">완료</button>
                                             </div>
                                         </div>
@@ -161,26 +162,14 @@
                                         <label className="block text-sm font-semibold text-gray-700 mb-2">📅 날짜</label>
                                         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg" />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">🕐 시작시간</label>
-                                        <div className="flex gap-2">
-                                            <select value={startTime.split(':')[0]} onChange={(e) => setStartTime(`${e.target.value}:${startTime.split(':')[1]}`)} className="flex-1 px-4 py-3 border-2 border-blue-200 rounded-lg">
-                                                {Array.from({length: 25}, (_, i) => String(i).padStart(2, '0')).map(h => <option key={h} value={h}>{h}시</option>)}
-                                            </select>
-                                            <select value={startTime.split(':')[1]} onChange={(e) => setStartTime(`${startTime.split(':')[0]}:${e.target.value}`)} className="w-20 px-2 py-3 border-2 border-blue-200 rounded-lg">
-                                                {['00', '15', '30', '45'].map(m => <option key={m} value={m}>{m}분</option>)}
-                                            </select>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">🕐 시작시간</label>
+                                            <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg" />
                                         </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">🕕 종료시간</label>
-                                        <div className="flex gap-2">
-                                            <select value={endTime.split(':')[0]} onChange={(e) => setEndTime(`${e.target.value}:${endTime.split(':')[1]}`)} className="flex-1 px-4 py-3 border-2 border-blue-200 rounded-lg">
-                                                {Array.from({length: 25}, (_, i) => String(i).padStart(2, '0')).map(h => <option key={h} value={h}>{h}시</option>)}
-                                            </select>
-                                            <select value={endTime.split(':')[1]} onChange={(e) => setEndTime(`${endTime.split(':')[0]}:${e.target.value}`)} className="w-20 px-2 py-3 border-2 border-blue-200 rounded-lg">
-                                                {['00', '15', '30', '45'].map(m => <option key={m} value={m}>{m}분</option>)}
-                                            </select>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">🕕 종료시간</label>
+                                            <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg" />
                                         </div>
                                     </div>
                                     <div>
@@ -195,19 +184,16 @@
                                             <option value="3">{workplaceName3}</option>
                                         </select>
                                     </div>
-                                    <button onClick={() => setShowSettings(!showSettings)} className="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 rounded-lg">⚙️ 근무지 이름 설정</button>
-                                    <button onClick={addRecord} className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
-                                        <i data-lucide="plus"></i> 기록 추가
-                                    </button>
+                                    <button onClick={() => setShowSettings(!showSettings)} className="w-full bg-gray-500 text-white font-bold py-2 rounded-lg">⚙️ 근무지 이름 설정</button>
+                                    <button onClick={addRecord} className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">기록 추가</button>
                                 </div>
                             </div>
 
-                            {/* 오른쪽: 미니 달력 */}
                             <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6">
                                 <div className="flex justify-between items-center mb-4">
-                                    <button onClick={prevMonth} className="p-2 hover:bg-blue-100 rounded-lg"><i data-lucide="chevron-left" className="text-blue-600"></i></button>
+                                    <button onClick={prevMonth} className="p-2 bg-blue-50 rounded-lg">이전달</button>
                                     <h3 className="text-lg font-bold text-gray-800">{monthStr}</h3>
-                                    <button onClick={nextMonth} className="p-2 hover:bg-blue-100 rounded-lg"><i data-lucide="chevron-right" className="text-blue-600"></i></button>
+                                    <button onClick={nextMonth} className="p-2 bg-blue-50 rounded-lg">다음달</button>
                                 </div>
                                 <div className="grid grid-cols-7 gap-1 mb-2">
                                     {['일', '월', '화', '수', '목', '금', '토'].map(d => <div key={d} className="text-center font-bold text-gray-600 py-2 text-sm">{d}</div>)}
@@ -222,27 +208,27 @@
                                         const dayWorkplaces = records.filter(r => r.date === dateStr).map(r => r.workplaceIndex);
                                         const uniqueWorkplaces = [...new Set(dayWorkplaces)];
 
-                                        let bgColor = 'bg-gray-100'; let textColor = 'text-gray-400'; let borderColor = '';
+                                        let bgColor = 'bg-gray-100'; let textColor = 'text-gray-600'; let borderColor = '';
                                         if (hasRecord) {
                                             textColor = 'text-white';
                                             if (uniqueWorkplaces.length === 1) {
-                                                if (uniqueWorkplaces[0] === '1') bgColor = 'bg-gradient-to-br from-orange-400 to-orange-500';
-                                                else if (uniqueWorkplaces[0] === '2') bgColor = 'bg-gradient-to-br from-green-400 to-green-500';
-                                                else bgColor = 'bg-gradient-to-br from-blue-400 to-blue-500';
+                                                if (uniqueWorkplaces[0] === '1') bgColor = 'bg-orange-500';
+                                                else if (uniqueWorkplaces[0] === '2') bgColor = 'bg-green-500';
+                                                else bgColor = 'bg-blue-500';
                                             } else {
-                                                bgColor = 'bg-white'; textColor = 'text-gray-800'; borderColor = 'border-2 border-blue-400';
+                                                bgColor = 'bg-white'; textColor = 'text-gray-800'; borderColor = 'border-2 border-blue-500';
                                             }
                                         }
 
                                         return (
                                             <button key={idx} onClick={() => handleDateClick(day)} className={`aspect-square p-1 rounded-lg flex flex-col items-center justify-center ${bgColor} ${textColor} ${borderColor}`}>
                                                 <span className="text-xs font-bold">{day}</span>
-                                                {hasRecord && <span className="text-[10px] opacity-80">{(pay/1000).toFixed(0)}k</span>}
+                                                {hasRecord && <span className="text-[10px] opacity-90">{(pay/1000).toFixed(0)}k</span>}
                                             </button>
                                         );
                                     })}
                                 </div>
-                                <div className="bg-gradient-to-r from-blue-100 to-blue-50 border-2 border-blue-300 rounded-lg p-4 text-center">
+                                <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 text-center">
                                     <p className="text-sm font-semibold text-gray-700 mb-2">이달 급여 합계</p>
                                     <p className="text-2xl font-bold text-blue-600">
                                         {records.filter(r => {
@@ -254,23 +240,21 @@
                             </div>
                         </div>
 
-                        {/* 요약 */}
                         <div className="grid grid-cols-3 gap-3 mb-6 text-white text-center">
-                            <div className="bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl p-3 shadow-lg">
+                            <div className="bg-blue-500 rounded-xl p-3 shadow-lg">
                                 <p className="text-xs font-semibold opacity-90">총 근무시간</p>
                                 <p className="text-xl font-bold">{totalHours.toFixed(1)}h</p>
                             </div>
-                            <div className="bg-gradient-to-br from-green-400 to-green-500 rounded-xl p-3 shadow-lg">
+                            <div className="bg-green-500 rounded-xl p-3 shadow-lg">
                                 <p className="text-xs font-semibold opacity-90">총 급여</p>
                                 <p className="text-xl font-bold">{totalPay.toLocaleString()}원</p>
                             </div>
-                            <div className="bg-gradient-to-br from-purple-400 to-purple-500 rounded-xl p-3 shadow-lg">
+                            <div className="bg-purple-500 rounded-xl p-3 shadow-lg">
                                 <p className="text-xs font-semibold opacity-90">기록 개수</p>
                                 <p className="text-xl font-bold">{records.length}건</p>
                             </div>
                         </div>
 
-                        {/* 목록 */}
                         {records.length === 0 ? (
                             <div className="bg-white rounded-2xl shadow-lg p-8 text-center text-gray-500"><p>아직 기록이 없습니다</p></div>
                         ) : (
@@ -289,7 +273,7 @@
                                                 <td className="p-2 text-center">{parseFloat(r.hours).toFixed(1)}h</td>
                                                 <td className="p-2 text-right font-bold text-blue-600">{r.dailyPay.toLocaleString()}원</td>
                                                 <td className="p-2 text-center">
-                                                    <button onClick={() => deleteRecord(r.id)} className="bg-red-500 text-white p-1 rounded"><i data-lucide="trash-2" style={{width: '14px', height: '14px'}}></i></button>
+                                                    <button onClick={() => deleteRecord(r.id)} className="bg-red-500 text-white px-2 py-0.5 rounded text-xs">삭제</button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -298,11 +282,10 @@
                             </div>
                         )}
 
-                        {/* 초기화 */}
                         {records.length > 0 && (
                             <div className="mt-6 flex justify-center">
-                                <button onClick={() => window.confirm('모든 기록을 삭제하시겠습니까?') && setRecords([])} className="bg-gray-500 text-white font-bold py-2 px-6 rounded-lg flex items-center gap-2">
-                                    <i data-lucide="rotate-ccw"></i> 전체 초기화
+                                <button onClick={() => window.confirm('모든 기록을 삭제하시겠습니까?') && setRecords([])} className="bg-gray-500 text-white font-bold py-2 px-6 rounded-lg">
+                                    전체 초기화
                                 </button>
                             </div>
                         )}
@@ -311,11 +294,7 @@
             );
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<AlbaDiary />);
-        
-        // 아이콘 렌더링 시작
-        setTimeout(() => lucide.createIcons(), 100);
+        ReactDOM.render(<AlbaDiary />, document.getElementById('root'));
     </script>
 </body>
 </html>
