@@ -220,6 +220,10 @@
             color: #666;
             padding: 8px;
             font-size: 12px;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .calendar-days {
@@ -597,7 +601,6 @@
                             <option>06</option>
                             <option>07</option>
                             <option>08</option>
-                            <option>09</option>
                             <option selected>09</option>
                             <option>10</option>
                             <option>11</option>
@@ -645,7 +648,6 @@
                             <option>15</option>
                             <option>16</option>
                             <option>17</option>
-                            <option>18</option>
                             <option selected>18</option>
                             <option>19</option>
                             <option>20</option>
@@ -872,13 +874,14 @@
             const calendarDays = document.getElementById('calendarDays');
             calendarDays.innerHTML = '';
 
-            // 빈 칸
+            // 빈 칸 추가 (중요: appendChild 포함)
             for (let i = 0; i < firstDay; i++) {
                 const emptyDiv = document.createElement('div');
                 emptyDiv.className = 'calendar-day empty';
+                calendarDays.appendChild(emptyDiv);
             }
 
-            // 날짜들
+            // 날짜들 추가
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const dayRecords = records.filter(r => r.date === dateStr);
